@@ -1,151 +1,128 @@
 <template>
   <div class="mb-6">
-    <p
-      class="mt-6 mb-3"
-      :style="
-        $vuetify.display.smAndDown ? 'font-size: 20px' : 'font-size: 25px'
-      "
-      style="font-weight: bold">
-      Let Fate Choose Your Meal!
-    </p>
+    <h2 class="section-title mt-6 mb-3">Let Fate Choose Your Meal!</h2>
+
     <v-row :dense="$vuetify.display.smAndDown">
+      <!-- Panel filter -->
       <v-col :cols="$vuetify.display.smAndDown ? 12 : 8">
-        <v-sheet
-          :class="$vuetify.display.smAndDown ? 'pa-4' : 'pa-6'"
-          height="100%"
-          style="border-radius: 4px"
-          elevation="0"
-          :style="
-            $vuetify.theme.global.name === 'dark'
-              ? 'background: linear-gradient(135deg, #ff7800, #ffb300);'
-              : 'background: linear-gradient(135deg, #ff9800, #ffb300);'
-          ">
-          <!-- overlay gelap tipis -->
-          <!-- <div
-            :style="
-              $vuetify.theme.global.name === 'dark'
-                ? 'background-color: rgba(0, 0, 0, 0.400)'
-                : 'background-color: rgba(255, 255, 255, 0.400)'
-            "
-            style="position: absolute; inset: 0; border-radius: inherit"></div> -->
-          <v-row dense>
-            <v-col cols="12">
-              <div>
-                <p
-                  class="mb-2"
-                  style="
-                    line-height: normal;
-                    font-size: 15px;
-                    max-width: 600px;
-                    color: white;
-                  ">
-                  Can’t decide what to cook? Spin the wheel of flavor and get a
-                  surprise recipe! Perfect for adventurous foodies or anyone
-                  tired of overthinking dinner
-                </p>
-              </div>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="selectedType"
-                :items="types"
-                label="Type"
-                hide-details
-                item-title="text"
-                item-value="value"
-                density="compact"
-                clearable></v-select>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="selectedDiet"
-                :items="diets"
-                label="Diet"
-                item-title="text"
-                item-value="value"
-                hide-details
-                density="compact"
-                clearable></v-select>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="selectedCuisine"
-                :items="cuisines"
-                item-title="text"
-                item-value="value"
-                label="Cuisine"
-                hide-details
-                density="compact"
-                clearable></v-select>
-            </v-col>
-          </v-row>
+        <div class="spin-panel" :class="{ dark: isDark }">
+          <v-icon class="spin-deco" aria-hidden="true">mdi-dice-multiple</v-icon>
 
-          <v-btn
-            class="mt-4 mb-2"
-            elevation="0"
-            color="white"
-            style="letter-spacing: normal; text-transform: capitalize"
-            :loading="loading"
-            block
-            @click="generateRandomRecipe">
-            <p
-              :style="
-                $vuetify.theme.global.name === 'dark'
-                  ? 'color: #ff7800;'
-                  : 'color: #ff7800'
-              ">
-              Generate Random Recipe
+          <div class="spin-content">
+            <p class="spin-intro">
+              Can’t decide what to cook? Spin the wheel of flavor and get a
+              surprise recipe! Perfect for adventurous foodies or anyone tired
+              of overthinking dinner.
             </p>
-          </v-btn>
-        </v-sheet>
-      </v-col>
-      <v-col :cols="$vuetify.display.smAndDown ? 12 : 4" class="fade-area">
-        <transition name="fade">
-          <v-card
-            elevation="0"
-            v-if="recipe"
-            :to="`/recipe/${recipe.id}`"
-            style="border-radius: 4px; height: 207px"
-            class="fade-in"
-            :style="
-              $vuetify.theme.global.name === 'dark'
-                ? 'background-color: #4f4f4f; '
-                : 'background-color: #fafafa; '
-            ">
-            <img
-              cover
-              position="center"
-              referrerPolicy="no-referrer"
-              style="border-radius: 4px"
-              :src="recipe.image"
-              width="100%"
-              height="160" />
-            <div class="pa-2">
-              <p style="text-transform: capitalize">
-                {{ recipe.title }}
-              </p>
-            </div>
-          </v-card>
-        </transition>
 
-        <!-- Static content saat belum ada hasil -->
-        <div
-          v-if="!recipe && !$vuetify.display.smAndDown"
-          style="height: 210px; border-radius: 4px"
-          class="text-center pa-4 d-flex flex-column align-center justify-center"
-          :style="
-            $vuetify.theme.global.name === 'dark'
-              ? 'background-color: #4f4f4f; '
-              : 'background-color: #fafafa; '
-          ">
-          <v-icon size="40" class="mb-2" color="grey"
-            >mdi-help-circle-outline</v-icon
-          >
-          <p class="text-subtitle-1 font-weight-medium">No recipe yet</p>
-          <p class="text-caption text-grey">
-            Select filters and click "Generate Random Recipe"
-          </p>
+            <v-row dense class="mt-2">
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedType"
+                  :items="types"
+                  label="Type"
+                  item-title="text"
+                  item-value="value"
+                  variant="solo"
+                  flat
+                  rounded="lg"
+                  density="comfortable"
+                  hide-details
+                  clearable />
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedDiet"
+                  :items="diets"
+                  label="Diet"
+                  item-title="text"
+                  item-value="value"
+                  variant="solo"
+                  flat
+                  rounded="lg"
+                  density="comfortable"
+                  hide-details
+                  clearable />
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedCuisine"
+                  :items="cuisines"
+                  label="Cuisine"
+                  item-title="text"
+                  item-value="value"
+                  variant="solo"
+                  flat
+                  rounded="lg"
+                  density="comfortable"
+                  hide-details
+                  clearable />
+              </v-col>
+            </v-row>
+
+            <v-btn
+              class="spin-btn mt-4"
+              color="white"
+              rounded="lg"
+              size="large"
+              elevation="0"
+              block
+              :loading="loading"
+              prepend-icon="mdi-dice-5-outline"
+              @click="generateRandomRecipe">
+              {{ recipe ? "Spin again" : "Generate Random Recipe" }}
+            </v-btn>
+          </div>
         </div>
+      </v-col>
+
+      <!-- Hasil -->
+      <v-col :cols="$vuetify.display.smAndDown ? 12 : 4">
+        <transition name="fade" mode="out-in">
+          <!-- Loading -->
+          <div v-if="loading" key="loading" class="result-card">
+            <div class="result-media skeleton" />
+            <div class="pa-3">
+              <div class="skeleton line" />
+              <div class="skeleton line short" />
+            </div>
+          </div>
+
+          <!-- Hasil resep -->
+          <router-link
+            v-else-if="recipe"
+            :key="recipe.id"
+            :to="`/recipe/${recipe.id}`"
+            class="result-card result-link">
+            <div class="result-media">
+              <img
+                :src="recipe.image"
+                :alt="recipe.title"
+                referrerpolicy="no-referrer" />
+            </div>
+            <div class="pa-3">
+              <p class="result-title">{{ recipe.title }}</p>
+              <span class="result-cta">
+                View recipe
+                <v-icon size="16" class="ml-1">mdi-arrow-right</v-icon>
+              </span>
+            </div>
+          </router-link>
+
+          <!-- Kosong -->
+          <div
+            v-else-if="!$vuetify.display.smAndDown"
+            key="empty"
+            class="result-card empty">
+            <v-icon size="40" class="mb-2" color="grey">
+              mdi-help-circle-outline
+            </v-icon>
+            <p class="text-subtitle-1 font-weight-medium">No recipe yet</p>
+            <p class="text-caption text-medium-emphasis">
+              Pick your filters, then hit Generate Random Recipe
+            </p>
+          </div>
+        </transition>
       </v-col>
     </v-row>
   </div>
@@ -222,6 +199,11 @@
         ],
       };
     },
+    computed: {
+      isDark() {
+        return this.$vuetify.theme.global.name === "dark";
+      },
+    },
     methods: {
       async generateRandomRecipe() {
         this.loading = true;
@@ -238,16 +220,10 @@
 
           const res = await axios.get(
             "https://api.spoonacular.com/recipes/complexSearch",
-            {
-              params,
-            }
+            { params }
           );
 
-          if (res.data.results.length) {
-            this.recipe = res.data.results[0];
-          } else {
-            this.recipe = null;
-          }
+          this.recipe = res.data.results.length ? res.data.results[0] : null;
         } catch (error) {
           console.error("Failed to fetch random recipe:", error);
         } finally {
@@ -259,8 +235,163 @@
 </script>
 
 <style scoped>
-  .no-shadow.v-input {
-    --v-shadow: none !important;
-    box-shadow: none !important;
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Panel filter */
+  .spin-panel {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    padding: 24px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ff9800, #ffb300);
+  }
+  .spin-panel.dark {
+    background: linear-gradient(135deg, #e86a00, #f2a100);
+  }
+  .spin-deco {
+    position: absolute;
+    right: -18px;
+    top: -18px;
+    font-size: 150px !important;
+    color: #fff;
+    opacity: 0.14;
+    transform: rotate(14deg);
+    pointer-events: none;
+  }
+  .spin-content {
+    position: relative;
+  }
+  .spin-intro {
+    max-width: 560px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .spin-btn {
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    color: #e86a00 !important;
+  }
+
+  /* Kartu hasil */
+  .result-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 210px;
+    overflow: hidden;
+    border-radius: 16px;
+    background-color: rgb(var(--v-theme-surface));
+    border: 1px solid rgba(var(--v-border-color), 0.12);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .result-link:hover {
+    border-color: rgba(255, 120, 0, 0.5);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+  .result-media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+  .result-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .result-link:hover .result-media img {
+    transform: scale(1.05);
+  }
+  .result-title {
+    font-weight: 600;
+    line-height: 1.3;
+    text-transform: capitalize;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .result-cta {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #FF4141;
+  }
+  .empty {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    border-style: dashed;
+  }
+
+  /* Skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(var(--v-theme-on-surface), 0.06) 25%,
+      rgba(var(--v-theme-on-surface), 0.14) 50%,
+      rgba(var(--v-theme-on-surface), 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .skeleton.line {
+    height: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+  }
+  .skeleton.line.short {
+    width: 60%;
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Transisi hasil */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  @media (max-width: 959px) {
+    .section-title {
+      font-size: 1.25rem;
+    }
+    .spin-panel {
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .result-card {
+      border-radius: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton,
+    .result-media img,
+    .fade-enter-active,
+    .fade-leave-active {
+      animation: none;
+      transition: none;
+    }
   }
 </style>

@@ -94,7 +94,7 @@
 
       <template v-slot:actions>
         <v-btn
-          color="#ff7800"
+          color="#FF4141"
           variant="text"
           @click="snackbar = false"
           style="text-transform: capitalize"

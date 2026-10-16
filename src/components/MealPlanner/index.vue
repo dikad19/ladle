@@ -152,7 +152,7 @@
 
 
     <v-btn
-      color="#ff7800"
+      color="#FF4141"
       flat
       class="mt-4"
       @click="saveMealPlan"
@@ -178,7 +178,7 @@
 
       <template v-slot:actions>
         <v-btn
-          color="#ff7800"
+          color="#FF4141"
           variant="text"
           @click="snackbar = false"
           style="text-transform: capitalize"

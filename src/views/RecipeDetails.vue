@@ -1,447 +1,227 @@
 <template>
-  <div class="container mx-auto p-4">
-    <!-- <v-btn @click="$router.back()" variant="outlined" class="mb-4">Back</v-btn> -->
-    <v-snackbar
-      v-model="snackbar"
-      :timeout="5000"
-    >
+  <div class="recipe-page">
+    <v-snackbar v-model="snackbar" :timeout="5000" rounded="lg">
       {{ text }}
-
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
-          color="#ff7800"
+          color="#FF4141"
           variant="text"
-          @click="snackbar = false"
-          style="text-transform: capitalize"
-        >
+          class="text-none"
+          @click="snackbar = false">
           Close
         </v-btn>
       </template>
     </v-snackbar>
 
-    <v-card variant="text" v-if="recipe">
-      <v-row :class="$vuetify.display.smAndDown ? '' : 'mt-6'">
-        <v-col :cols="$vuetify.display.smAndDown ? 12 : 6">
-          <v-img
-            style="border-radius: 4px"
-            :src="recipe.image"
-            :alt="recipe.title"
-            :height="$vuetify.display.smAndDown ? '250px' : '350px'"
-            cover
-            class="mb-3">
+    <!-- Loading -->
+    <v-row v-if="!recipe && !error" class="mt-2">
+      <v-col cols="12" md="6">
+        <div class="skeleton hero-skel" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <div class="skeleton line w60" />
+        <div class="skeleton line w40" />
+        <div class="skeleton block" />
+      </v-col>
+    </v-row>
+
+    <!-- Error -->
+    <div v-else-if="error" class="empty-state">
+      <v-icon size="40" color="grey" class="mb-2">mdi-alert-circle-outline</v-icon>
+      <p class="text-subtitle-1 font-weight-medium">Couldn’t load this recipe</p>
+      <v-btn
+        class="mt-3 text-none"
+        color="primary"
+        variant="flat"
+        rounded="lg"
+        @click="$router.back()">
+        Go back
+      </v-btn>
+    </div>
+
+    <template v-else>
+      <v-row :class="$vuetify.display.smAndDown ? '' : 'mt-2'">
+        <!-- Gambar -->
+        <v-col cols="12" md="6">
+          <div class="hero">
+            <v-img
+              :src="recipe.image"
+              :alt="recipe.title"
+              cover
+              class="hero-img">
+              <template #placeholder>
+                <div class="skeleton fill" />
+              </template>
+            </v-img>
             <v-btn
               icon
-              class="ma-2"
-              style="position: absolute; top: 0; left: 0; z-index: 1"
-              color="white"
               size="small"
-              variant="tonal"
+              variant="flat"
+              class="back-btn"
+              aria-label="Back"
               @click="$router.back()">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
-          </v-img>
-          <div class="d-flex align-center mt-4 mb-8">
-            <div class="download-btn cursor-pointer" @click="downloadRecipeCard(recipe.id)">
-              Download Recipe
-            </div>
-            <div @click="toggleFavorite" class="save-btn ml-2 cursor-pointer">
-              <v-progress-circular v-if="bookmarkLogin" size="20" indeterminate></v-progress-circular>
-              <v-icon v-else>{{
-                isFav ? "mdi-bookmark-check" : "mdi-bookmark-outline"
-              }}</v-icon>
-            </div>
           </div>
         </v-col>
-        <v-col cols="6" v-if="!$vuetify.display.smAndDown">
-          <v-row :dense="true">
-            <v-col cols="3">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #ffff002c">
-                <v-icon class="mb-2" color="yellow"> mdi-clock-outline </v-icon>
-                <p style="font-size: 15px">Time</p>
-                <span style="font-size: 15px; font-weight: bold">
-                  {{ recipe.readyInMinutes }} min
-                </span>
+
+        <!-- Info utama -->
+        <v-col cols="12" md="6">
+          <h1 class="recipe-title">{{ recipe.title }}</h1>
+
+          <div class="d-flex flex-wrap ga-2 mt-3">
+            <v-chip v-if="recipe.glutenFree" color="green" size="small" variant="tonal">Gluten Free</v-chip>
+            <v-chip v-if="recipe.dairyFree" color="blue" size="small" variant="tonal">Dairy Free</v-chip>
+            <v-chip v-if="recipe.vegan" color="deep-purple" size="small" variant="tonal">Vegan</v-chip>
+            <v-chip v-if="recipe.vegetarian" color="orange" size="small" variant="tonal">Vegetarian</v-chip>
+          </div>
+
+          <div class="d-flex align-center ga-2 mt-4">
+            <v-btn
+              color="primary"
+              variant="flat"
+              rounded="lg"
+              class="text-none font-weight-medium flex-grow-1"
+              :loading="downloading"
+              prepend-icon="mdi-download-outline"
+              @click="downloadRecipeCard(recipe.id)">
+              Download Recipe
+            </v-btn>
+            <v-btn
+              icon
+              variant="outlined"
+              color="primary"
+              rounded="lg"
+              :loading="bookmarkLogin"
+              :aria-label="isFav ? 'Remove bookmark' : 'Bookmark recipe'"
+              @click="toggleFavorite">
+              <v-icon>{{ isFav ? "mdi-bookmark-check" : "mdi-bookmark-outline" }}</v-icon>
+            </v-btn>
+          </div>
+
+          <!-- Statistik -->
+          <v-row dense class="mt-3">
+            <v-col v-for="stat in stats" :key="stat.label" cols="6" sm="3">
+              <div class="stat" :style="{ '--tone': stat.tone }">
+                <v-icon size="22" class="stat-icon">{{ stat.icon }}</v-icon>
+                <span class="stat-label">{{ stat.label }}</span>
+                <span class="stat-value">{{ stat.value }}</span>
               </div>
             </v-col>
-            <v-col cols="3">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #ff000041">
-                <v-icon class="mb-2" color="red">mdi-heart-outline</v-icon>
-                <p style="font-size: 15px">Health Score</p>
-                <span style="font-size: 15px; font-weight: bold">
-                  {{ recipe.healthScore }}
-                </span>
-              </div>
-            </v-col>
-            <v-col cols="3">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #80008067">
-                <v-icon class="mb-2" color="purple">mdi-star-outline</v-icon>
-                <p style="font-size: 15px">Score</p>
-                <span style="font-size: 15px; font-weight: bold">
-                  {{ Math.round(recipe.spoonacularScore) }}%
-                </span>
-              </div>
-            </v-col>
-            <v-col cols="3">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #ffa60077">
-                <v-icon class="mb-2" color="orange">mdi-currency-usd</v-icon>
-                <p style="font-size: 15px">Per Serving</p>
-                <span style="font-size: 15px; font-weight: bold">
-                  {{ centsToUSD(recipe.pricePerServing) }}
-                </span>
-              </div>
-            </v-col>
-            <v-col cols="6">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #00800038">
-                <v-icon class="mb-2" color="green"
-                  >mdi-room-service-outline
-                </v-icon>
-                <p style="font-size: 15px; margin-bottom: -1px">Serving</p>
-                <div class="d-flex align-center mt-4 mb-2">
-                  <v-icon
-                    style="font-size: 18px"
-                    class="mr-6"
-                    @click="currentServings = Math.max(1, currentServings - 1)"
-                    >mdi-minus</v-icon
-                  >
-                  <p style="font-weight: bold; font-size: 16px">
-                    {{ currentServings }}
-                  </p>
-                  <v-icon
-                    style="font-size: 18px"
-                    class="ml-6"
-                    @click="currentServings++"
-                    >mdi-plus</v-icon
-                  >
+          </v-row>
+
+          <!-- Kontrol porsi & satuan -->
+          <v-row dense class="mt-1">
+            <v-col cols="12" sm="6">
+              <div class="control">
+                <span class="control-label">Servings</span>
+                <div class="d-flex align-center ga-3">
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="tonal"
+                    aria-label="Fewer servings"
+                    :disabled="currentServings <= 1"
+                    @click="currentServings = Math.max(1, currentServings - 1)">
+                    <v-icon>mdi-minus</v-icon>
+                  </v-btn>
+                  <span class="servings-num">{{ currentServings }}</span>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="tonal"
+                    aria-label="More servings"
+                    @click="currentServings++">
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
                 </div>
               </div>
             </v-col>
-            <v-col cols="6">
-              <div
-                class="d-flex align-center pa-2 justify-center flex-column"
-                style="border-radius: 4px; background-color: #0000ff4d">
-                <v-icon class="mb-2" color="blue"> mdi-scale </v-icon>
-                <p class="mb-1" style="font-size: 15px">Scale</p>
+            <v-col cols="12" sm="6">
+              <div class="control">
+                <span class="control-label">Units</span>
                 <v-btn-toggle
                   v-model="scale"
-                  rounded="2"
-                  style="margin-bottom: -5px"
-                  group>
-                  <v-btn
-                    height="35"
-                    value="metric"
-                    style="
-                      font-weight: bold;
-                      letter-spacing: normal;
-                      text-transform: capitalize;
-                    ">
-                    Metric
-                  </v-btn>
-
-                  <v-btn
-                    height="35"
-                    value="us"
-                    style="font-weight: bold; letter-spacing: normal">
-                    US
-                  </v-btn>
+                  mandatory
+                  density="comfortable"
+                  rounded="lg"
+                  color="primary"
+                  variant="outlined"
+                  divided>
+                  <v-btn value="metric" class="text-none">Metric</v-btn>
+                  <v-btn value="us" class="text-none">US</v-btn>
                 </v-btn-toggle>
               </div>
             </v-col>
-            <v-col cols="12" v-if="recipe.occasions.length > 0">
-              <p class="mb-2 mt-2" style="font-weight: bold">Occasions</p>
-              <v-row dense>
-                <v-col cols="3" v-for="item in recipe.occasions" :key="item">
-                  <div
-                    style="border-radius: 4px"
-                    class="d-flex align-center justify-center pa-3"
-                    :style="
-                      $vuetify.theme.global.name === 'dark'
-                        ? 'background-color: #4f4f4f; '
-                        : 'background-color: #fafafa; '
-                    ">
-                    <v-icon class="mr-2" style="font-size: 20px">
-                      {{ occasionsItems[item] }}
-                    </v-icon>
-                    <p
-                      style="
-                        text-transform: capitalize;
-                        text-align: center;
-                        font-size: 14px;
-                        font-weight: bold;
-                      ">
-                      {{ item }}
-                    </p>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-col>
           </v-row>
+
+          <!-- Occasions -->
+          <div v-if="recipe.occasions && recipe.occasions.length" class="mt-4">
+            <p class="section-label mb-2">Best for</p>
+            <div class="d-flex flex-wrap ga-2">
+              <v-chip
+                v-for="item in recipe.occasions"
+                :key="item"
+                size="small"
+                variant="tonal"
+                :prepend-icon="occasionsItems[item]"
+                class="text-capitalize">
+                {{ item }}
+              </v-chip>
+            </div>
+          </div>
         </v-col>
       </v-row>
 
-      <p class="text-h6 font-weight-bold mb-4" style="line-height: normal">
-        {{ recipe.title }}
-      </p>
-
-      <div class="d-flex flex-wrap gap-2 mb-4">
-        <v-chip
-          v-if="recipe.glutenFree"
-          color="green"
-          text-color="white"
-          size="small"
-          >Gluten Free</v-chip
-        >
-        <v-chip
-          v-if="recipe.dairyFree"
-          color="blue"
-          text-color="white"
-          size="small"
-          >Dairy Free</v-chip
-        >
-        <v-chip
-          v-if="recipe.vegan"
-          color="deep-purple"
-          text-color="white"
-          size="small"
-          >Vegan</v-chip
-        >
-        <v-chip
-          v-if="recipe.vegetarian"
-          color="orange"
-          text-color="white"
-          size="small"
-          >Vegetarian</v-chip
-        >
-      </div>
-      <div>
+      <!-- Ringkasan -->
+      <div v-if="recipe.summary" class="mt-4">
         <div
-          v-if="recipe.summary && $vuetify.display.smAndDown"
-          class="summary-container">
-          <transition name="expand">
-            <div
-              v-show="expanded"
-              key="expanded"
-              v-html="recipe.summary"
-              class="mb-4 text-content"
-              style="font-size: 15px"></div>
-          </transition>
-
-          <transition name="expand">
-            <div
-              v-show="!expanded"
-              key="collapsed"
-              v-html="shortSummary"
-              class="mb-4 text-content"
-              style="font-size: 15px"></div>
-          </transition>
-          <div style="width: 100%" class="d-flex align-center justify-center">
-            <span
-              style="text-align: center; font-weight: bold; font-size: 14px"
-              @click="toggleExpand"
-              v-if="!expanded">
-              Show More <v-icon>mdi-chevron-down</v-icon>
-            </span>
-          </div>
-        </div>
-        <div
-          v-else-if="recipe.summary && !$vuetify.display.smAndDown"
+          class="summary"
+          :class="{ clamped: $vuetify.display.smAndDown && !expanded }"
           v-html="recipe.summary"></div>
-
-        <v-row :dense="true" class="mt-4" v-if="$vuetify.display.smAndDown">
-          <v-col :cols="$vuetify.display.smAndDown ? 3 : 4">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #ffff002c">
-              <v-icon class="mb-2" color="yellow">mdi-clock-outline </v-icon>
-              <p style="font-size: 14px">Time</p>
-              <span style="font-size: 15px; font-weight: bold">
-                {{ recipe.readyInMinutes }} min
-              </span>
-            </div>
-          </v-col>
-          <v-col :cols="$vuetify.display.smAndDown ? 3 : 4">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #ff000041">
-              <v-icon class="mb-2" color="red"> mdi-heart-outline </v-icon>
-              <p
-                style="
-                  font-size: 14px;
-                  max-width: 60px;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                  overflow: hidden;
-                ">
-                Health Score
-              </p>
-              <span style="font-size: 15px; font-weight: bold">
-                {{ recipe.healthScore }}
-              </span>
-            </div>
-          </v-col>
-          <v-col :cols="$vuetify.display.smAndDown ? 3 : 4">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #80008067">
-              <v-icon class="mb-2" color="purple">mdi-star-outline</v-icon>
-              <p style="font-size: 14px">Score</p>
-              <span style="font-size: 15px; font-weight: bold">
-                {{ Math.round(recipe.spoonacularScore) }}%
-              </span>
-            </div>
-          </v-col>
-          <v-col :cols="$vuetify.display.smAndDown ? 3 : 4">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #ffa60077">
-              <v-icon class="mb-2" color="orange">mdi-currency-usd</v-icon>
-              <p style="font-size: 14px">Per Serving</p>
-              <span style="font-size: 15px; font-weight: bold">
-                {{ centsToUSD(recipe.pricePerServing) }}
-              </span>
-            </div>
-          </v-col>
-          <v-col cols="6">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #00800038">
-              <v-icon class="mb-2" color="green"
-                >mdi-room-service-outline</v-icon
-              >
-              <p style="font-size: 14px; margin-bottom: -1px">Serving</p>
-              <div class="d-flex align-center mt-4 mb-2">
-                <v-icon
-                  style="font-size: 18px"
-                  class="mr-6"
-                  @click="currentServings = Math.max(1, currentServings - 1)"
-                  >mdi-minus</v-icon
-                >
-                <p style="font-weight: bold; font-size: 16px">
-                  {{ currentServings }}
-                </p>
-                <v-icon
-                  style="font-size: 18px"
-                  class="ml-6"
-                  @click="currentServings++"
-                  >mdi-plus</v-icon
-                >
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="6">
-            <div
-              class="d-flex align-center pa-2 justify-center flex-column"
-              style="border-radius: 4px; background-color: #0000ff4d">
-              <v-icon class="mb-2" color="blue"> mdi-scale </v-icon>
-              <p class="mb-1" style="font-size: 14px">Scale</p>
-              <v-btn-toggle
-                v-model="scale"
-                rounded="2"
-                style="margin-bottom: -5px"
-                group>
-                <v-btn
-                  height="35"
-                  value="metric"
-                  style="text-transform: capitalize">
-                  Metric
-                </v-btn>
-
-                <v-btn height="35" value="us"> US </v-btn>
-              </v-btn-toggle>
-            </div>
-          </v-col>
-          <v-col cols="12" v-if="recipe.occasions.length > 0">
-            <p class="mb-2 mt-2" style="font-weight: bold">Occasions</p>
-            <v-row dense>
-              <v-col cols="3" v-for="item in recipe.occasions" :key="item">
-                <div
-                  style="border-radius: 4px"
-                  class="d-flex align-center justify-center pa-3"
-                  :style="
-                    $vuetify.theme.global.name === 'dark'
-                      ? 'background-color: #4f4f4f; '
-                      : 'background-color: #fafafa; '
-                  ">
-                  <v-icon class="mr-2" style="font-size: 20px">
-                    {{ occasionsItems[item] }}
-                  </v-icon>
-                  <p
-                    style="
-                      text-transform: capitalize;
-                      text-align: center;
-                      font-size: 14px;
-                      font-weight: bold;
-                    ">
-                    {{ item }}
-                  </p>
-                </div>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-
-        <v-row class="mb-4 mt-4">
-          <v-col :cols="$vuetify.display.smAndDown ? 12 : 6">
-            <div v-if="recipe.extendedIngredients">
-              <p class="mb-2" style="font-weight: bold">Ingredients</p>
-              <div
-                v-for="ingredient in adjustedIngredients"
-                :key="ingredient.id">
-                <p style="font-size: 14px">
-                  <strong
-                    >{{ formatAmountToFraction(ingredient.adjustedAmount) }}
-                    {{ ingredient.adjustedUnit }}</strong
-                  >
-                  {{ ingredient.originalName }}
-                </p>
-                <div
-                  style="
-                    width: 100%;
-                    border-bottom: 1px dashed #757575;
-                    margin-top: 5px;
-                    margin-bottom: 5px;
-                  "></div>
-              </div>
-            </div>
-          </v-col>
-          <v-col :cols="$vuetify.display.smAndDown ? 12 : 6">
-            <div v-if="recipe.analyzedInstructions?.length">
-              <p class="mb-2" style="font-weight: bold">Step</p>
-              <div
-                class="pa-3 pt-4"
-                style="border-radius: 4px"
-                :style="
-                  $vuetify.theme.global.name === 'dark'
-                    ? 'background-color: #4f4f4f; '
-                    : 'background-color: #fafafa; '
-                ">
-                <div
-                  v-for="step in recipe.analyzedInstructions[0].steps"
-                  :key="step.number"
-                  class="pb-3">
-                  <div class="d-flex align-start">
-                    <p style="font-size: 14px; margin-top: -3px">
-                      {{ step.number }}. {{ step.step }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </v-col>
-        </v-row>
+        <v-btn
+          v-if="$vuetify.display.smAndDown"
+          variant="text"
+          size="small"
+          class="text-none font-weight-bold px-0"
+          @click="toggleExpand">
+          {{ expanded ? "Show less" : "Show more" }}
+          <v-icon end>{{ expanded ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
+        </v-btn>
       </div>
-    </v-card>
 
-    <p v-else class="text-gray-500">Loading recipe details...</p>
+      <!-- Bahan & langkah -->
+      <v-row class="mt-4 mb-4">
+        <v-col cols="12" md="5">
+          <div v-if="recipe.extendedIngredients" class="panel">
+            <h2 class="panel-title">Ingredients</h2>
+            <ul class="ingredients">
+              <li v-for="ingredient in adjustedIngredients" :key="ingredient.id">
+                <strong>
+                  {{ formatAmountToFraction(ingredient.adjustedAmount) }}
+                  {{ ingredient.adjustedUnit }}
+                </strong>
+                {{ ingredient.originalName }}
+              </li>
+            </ul>
+          </div>
+        </v-col>
+
+        <v-col cols="12" md="7">
+          <div v-if="recipe.analyzedInstructions?.length" class="panel">
+            <h2 class="panel-title">Steps</h2>
+            <ol class="steps">
+              <li
+                v-for="step in recipe.analyzedInstructions[0].steps"
+                :key="step.number">
+                <span class="step-number">{{ step.number }}</span>
+                <p>{{ step.step }}</p>
+              </li>
+            </ol>
+          </div>
+        </v-col>
+      </v-row>
+    </template>
   </div>
 </template>
 
@@ -449,6 +229,7 @@
   import { useFavoritesStore } from "@/stores/favoritesStore";
   import { useAuthStore } from "@/stores/authStore";
   import axios from "axios";
+
   export default {
     props: ["id"],
 
@@ -461,29 +242,36 @@
           spring: "mdi-leaf",
         },
         bookmarkLogin: false,
+        downloading: false,
         currentServings: 1,
-        isMetric: true,
         scale: "metric",
         recipe: null,
+        error: false,
         expanded: false,
         snackbar: false,
-        text: ""
+        text: "",
       };
     },
 
     methods: {
       async downloadRecipeCard(id) {
-        this.loading = true;
-        const { data } = await axios.get(
-          `https://api.spoonacular.com/recipes/${id}/card`,
-          { params: { apiKey: process.env.VUE_APP_SPOONACULAR_API_KEY } }
-        );
-        this.loading = false;
-        window.open(data.url, "_blank", "noopener");
+        this.downloading = true;
+        try {
+          const { data } = await axios.get(
+            `https://api.spoonacular.com/recipes/${id}/card`,
+            { params: { apiKey: process.env.VUE_APP_SPOONACULAR_API_KEY } }
+          );
+          window.open(data.url, "_blank", "noopener");
+        } catch (error) {
+          console.error("Error downloading recipe card:", error);
+          this.text = "Couldn’t download the recipe card. Try again.";
+          this.snackbar = true;
+        } finally {
+          this.downloading = false;
+        }
       },
 
       async toggleFavorite() {
-        this.bookmarkLogin = true
         const authStore = useAuthStore();
         const favoritesStore = useFavoritesStore();
 
@@ -492,16 +280,18 @@
           return;
         }
 
-        if (favoritesStore.isFavorite(this.recipe.id)) {
-          await favoritesStore.removeFavorite(this.recipe.id);
-          this.snackbar = true
-          this.text = "You have removed the recipe from your bookmarks"
-          this.bookmarkLogin = false
-        } else {
-          await favoritesStore.addFavorite(this.recipe);
-          this.snackbar = true
-          this.text = "You have bookmarked the recipe"
-          this.bookmarkLogin = false
+        this.bookmarkLogin = true;
+        try {
+          if (favoritesStore.isFavorite(this.recipe.id)) {
+            await favoritesStore.removeFavorite(this.recipe.id);
+            this.text = "You have removed the recipe from your bookmarks";
+          } else {
+            await favoritesStore.addFavorite(this.recipe);
+            this.text = "You have bookmarked the recipe";
+          }
+          this.snackbar = true;
+        } finally {
+          this.bookmarkLogin = false;
         }
       },
 
@@ -555,22 +345,45 @@
         this.currentServings = this.recipe.servings;
       } catch (error) {
         console.error("Error fetching recipe details:", error);
+        this.error = true;
       }
     },
 
     computed: {
       isFav() {
+        if (!this.recipe) return false;
         const store = useFavoritesStore();
         return store.isFavorite(this.recipe.id);
       },
 
-      shortSummary() {
-        const div = document.createElement("div");
-        div.innerHTML = this.recipe.summary;
-        const textOnly = div.textContent || div.innerText || "";
-        return textOnly.length > 100
-          ? textOnly.substring(0, 100) + "..."
-          : textOnly;
+      stats() {
+        if (!this.recipe) return [];
+        return [
+          {
+            icon: "mdi-clock-outline",
+            label: "Time",
+            value: `${this.recipe.readyInMinutes} min`,
+            tone: "255, 179, 0",
+          },
+          {
+            icon: "mdi-heart-outline",
+            label: "Health score",
+            value: this.recipe.healthScore,
+            tone: "244, 67, 54",
+          },
+          {
+            icon: "mdi-star-outline",
+            label: "Score",
+            value: `${Math.round(this.recipe.spoonacularScore)}%`,
+            tone: "156, 39, 176",
+          },
+          {
+            icon: "mdi-currency-usd",
+            label: "Per serving",
+            value: this.centsToUSD(this.recipe.pricePerServing),
+            tone: "255, 120, 0",
+          },
+        ];
       },
 
       adjustedIngredients() {
@@ -599,65 +412,230 @@
 </script>
 
 <style scoped>
-  .save-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 35px;
-    width: 100%;
-    border: 2px solid #ff7800;
-    border-radius: 4px;
-    color: #ff7800;
-    max-width: 40px;
-  }
-  .download-btn {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 500;
-    justify-content: center;
-    height: 35px;
-    color: white;
-    width: 100%;
-    border-radius: 4px;
-    background-color: #ff7800;
-  }
-  .step-number {
-    font-size: 12px;
-    line-height: normal;
-    border-radius: 50%;
-    height: 18px;
-    min-width: 18px;
-    background-color: white;
-    color: black;
+  .recipe-page {
+    padding: 16px;
   }
 
-  .border-dashed {
-    width: 100%;
-    border-bottom: 1px dashed #757575;
-    margin-top: 2px;
+  /* Hero */
+  .hero {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .hero-img {
+    aspect-ratio: 4 / 3;
+  }
+  .back-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .recipe-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Statistik */
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background-color: rgba(var(--tone), 0.12);
+  }
+  .stat-icon {
+    color: rgb(var(--tone));
     margin-bottom: 2px;
   }
-
-  .gap-2 {
-    gap: 0.5rem;
+  .stat-label {
+    font-size: 0.8rem;
+    color: rgba(var(--v-theme-on-surface), 0.7);
+  }
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 700;
   }
 
-  .text-content {
+  /* Kontrol */
+  .control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--v-border-color), 0.12);
+  }
+  .control-label,
+  .section-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .servings-num {
+    min-width: 24px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  /* Ringkasan */
+  .summary {
+    max-width: 90ch;
+    line-height: 1.6;
+    color: rgba(var(--v-theme-on-surface), 0.8);
+  }
+  .summary.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    font-size: 14px;
+  }
+  .summary :deep(a) {
+    color: #FF4141;
   }
 
-  /* Transisi */
-  .expand-enter-active,
-  .expand-leave-active {
-    transition: all 0.3s ease;
-    max-height: 300px;
-    opacity: 1;
+  /* Panel bahan & langkah */
+  .panel {
+    height: 100%;
+    padding: 20px;
+    border-radius: 16px;
+    background-color: rgb(var(--v-theme-surface));
+    border: 1px solid rgba(var(--v-border-color), 0.12);
   }
-  .expand-enter-from,
-  .expand-leave-to {
-    max-height: 0;
-    opacity: 0;
+  .panel-title {
+    margin-bottom: 12px;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .ingredients {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ingredients li {
+    padding: 9px 0;
+    font-size: 0.95rem;
+    border-bottom: 1px dashed rgba(var(--v-border-color), 0.25);
+  }
+  .ingredients li:last-child {
+    border-bottom: none;
+  }
+
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .steps li {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  .steps li:last-child {
+    padding-bottom: 0;
+  }
+  .steps p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    padding-top: 2px;
+  }
+  .step-number {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #FF4141;
+  }
+
+  /* Skeleton & empty */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(var(--v-theme-on-surface), 0.06) 25%,
+      rgba(var(--v-theme-on-surface), 0.14) 50%,
+      rgba(var(--v-theme-on-surface), 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+    border-radius: 12px;
+  }
+  .skeleton.fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+  .hero-skel {
+    aspect-ratio: 4 / 3;
+    border-radius: 16px;
+  }
+  .skeleton.line {
+    height: 18px;
+    margin-bottom: 12px;
+  }
+  .skeleton.block {
+    height: 160px;
+    margin-top: 16px;
+  }
+  .w60 {
+    width: 60%;
+  }
+  .w40 {
+    width: 40%;
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 64px 16px;
+    text-align: center;
+  }
+
+  @media (max-width: 959px) {
+    .recipe-page {
+      padding: 12px;
+    }
+    .hero {
+      border-radius: 12px;
+    }
+    .hero-img {
+      aspect-ratio: 16 / 10;
+    }
+    .recipe-title {
+      font-size: 1.35rem;
+    }
+    .panel {
+      padding: 16px;
+      border-radius: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+    }
   }
 </style>

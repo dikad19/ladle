@@ -1,42 +1,42 @@
 <template>
-  <v-app-bar app elevation="0">
-    <div
-      class="d-flex align-center justify-space-between mx-auto pl-4 pr-4"
-      style="max-width: 1140px; width: 100%">
+  <!-- Bar utama -->
+  <v-app-bar app flat class="nav-main" height="64">
+    <div class="nav-container">
       <div class="d-flex align-center">
-        <v-icon
-          class="mr-4"
+        <v-btn
           v-if="$vuetify.display.smAndDown"
-          @click.stop="drawer = !drawer"
-          >{{ drawer ? "mdi-close" : "mdi-menu" }}</v-icon
-        >
+          icon
+          variant="text"
+          size="small"
+          class="mr-2"
+          aria-label="Toggle menu"
+          @click.stop="drawer = !drawer">
+          <v-icon>{{ drawer ? "mdi-close" : "mdi-menu" }}</v-icon>
+        </v-btn>
+
         <v-img
           src="/assets/logo.png"
-          style="cursor: pointer"
-          @click="handleHome"
-          max-height="35"
-          min-width="35"></v-img>
-        <div
-          v-if="!$vuetify.display.smAndDown"
-          class="d-flex align-center ml-4"
-          :style="$vuetify.display.smAndDown ? 'gap: 10px' : 'gap: 20px'"
-          :class="$vuetify.display.smAndDown ? '' : ''">
-          <div
-            style="font-size: 15px; font-weight: 500"
-            @click="toHome"
-            class="cursor-pointer">
-            Home
-          </div>
-          <div
-            style="font-size: 15px; font-weight: 500"
-            @click="toBlog"
-            class="cursor-pointer">
-            Blog
-          </div>
-        </div>
+          class="logo"
+          max-height="34"
+          min-width="34"
+          max-width="120"
+          @click="handleHome" />
+
+        <nav v-if="!$vuetify.display.smAndDown" class="d-flex align-center ml-6 ga-1">
+          <button
+            v-for="link in mainLinks"
+            :key="link.to"
+            class="nav-link"
+            :class="{ active: isActive(link.to) }"
+            @click="$router.push(link.to)">
+            {{ link.name }}
+          </button>
+        </nav>
       </div>
-      <div class="d-flex align-center">
+
+      <div class="d-flex align-center ga-2">
         <v-autocomplete
+          v-if="!$vuetify.display.smAndDown"
           v-model="selectedRecipe"
           :items="results"
           :loading="loading"
@@ -44,166 +44,108 @@
           item-value="id"
           return-object
           no-filter
-          class="mx-auto mr-3"
-          style="min-width: 350px; margin-bottom: -22px"
-          v-if="!$vuetify.display.smAndDown"
           hide-no-data
-          :hide-details="false"
+          hide-details
           density="compact"
-          append-inner-icon="mdi-magnify"
-          variant="outlined"
+          variant="solo-filled"
+          flat
+          rounded="pill"
+          class="search-field"
+          prepend-inner-icon="mdi-magnify"
           menu-icon=""
           placeholder="Search recipe or ingredient"
           @keydown.enter="searchRecipes"
           @update:search="onSearch"
           @update:model-value="onSelect" />
-        <div class="d-flex align-center">
-          <div class="d-flex align-center">
-            <!-- Jangan akses authStore langsung jika masih null -->
-            <div v-if="authStore && authStore.initialized">
-              <div
-                v-if="
-                  authStore.user &&
-                  authStore.user?.photoURL &&
-                  authStore.user?.displayName
-                "
-                class="d-flex align-center button-profile"
-                :style="
-                  $vuetify.theme.global.name === 'dark'
-                    ? 'background-color: #4f4f4f; '
-                    : 'background-color: #fafafa; '
-                ">
-                <v-img
-                  v-if="user.photoURL"
-                  class="mr-2"
-                  referrerpolicy="no-referrer"
-                  height="20"
-                  width="20"
-                  cover=""
-                  style="border-radius: 50%"
-                  :to="'/profile'"
-                  :src="user.photoURL"
-                  alt="User Photo" />
-                <p
-                  v-if="user.displayName.split(' ').length > 1"
-                  style="
-                    font-size: 14px;
-                    font-weight: 500;
-                    line-height: normal;
-                  ">
-                  {{ user.displayName.split(" ")[0] }}
-                </p>
-                <p
-                  v-else
-                  style="
-                    font-size: 14px;
-                    font-weight: 500;
-                    line-height: normal;
-                  ">
-                  {{ user.displayName }}
-                </p>
-                <v-menu activator="parent">
-                  <v-list>
-                    <v-list-item @click="toProfile" style="min-height: 55px">
-                      <div class="d-flex">
-                        <v-avatar size="35">
-                          <v-img :src="user.photoURL"></v-img>
-                        </v-avatar>
-                        <div class="ml-4">
-                          <p
-                            style="
-                              font-weight: bold;
-                              font-size: 15px;
-                              line-height: normal;
-                            ">
-                            {{ user.displayName }}
-                          </p>
-                          <p style="font-size: 13px">{{ user.email }}</p>
-                        </div>
-                      </div>
-                    </v-list-item>
-                  
-                    <v-list-item @click="logout" style="min-height: 40px">
-                      <p
-                        style="
-                          font-weight: bold;
-                          font-size: 14px;
-                          color: #ff7800;
-                        ">
-                        Logout
-                      </p>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </div>
-              <div
-                v-else
-                text
-                @click="handleLogin"
-                class="button-profile"
-                :style="
-                  $vuetify.theme.global.name === 'dark'
-                    ? 'background-color: #4f4f4f; '
-                    : 'background-color: #fafafa; '
-                ">
-                <p
-                  style="
-                    font-size: 15px;
-                    font-weight: 500;
-                    line-height: normal;
-                  ">
-                  Login
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <div
-            @click="toggleTheme"
-            class="toggle-mode"
-            style="margin-bottom: 2px"
-            :style="
-              !isDark
-                ? 'background-color: #fafafa'
-                : 'background-color: #4f4f4f'
-            ">
-            <v-icon style="font-size: 20px">
-              {{ isDark ? "mdi-white-balance-sunny" : "mdi-weather-night" }}
-            </v-icon>
-          </div>
-        </div>
+        <!-- Jangan akses authStore langsung jika masih null -->
+        <template v-if="authStore && authStore.initialized">
+          <v-menu
+            v-if="user && user.photoURL && user.displayName"
+            location="bottom end"
+            offset="8">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                variant="tonal"
+                rounded="pill"
+                class="profile-btn px-2">
+                <v-avatar size="26" class="mr-2">
+                  <v-img :src="user.photoURL" referrerpolicy="no-referrer" alt="User Photo" />
+                </v-avatar>
+                <span class="text-body-2 font-weight-medium">{{ firstName }}</span>
+                <v-icon size="18" class="ml-1">mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list min-width="240" rounded="lg" class="pa-2 menu-list">
+              <v-list-item rounded="lg" @click="toProfile">
+                <template #prepend>
+                  <v-avatar size="36" class="mr-3">
+                    <v-img :src="user.photoURL" />
+                  </v-avatar>
+                </template>
+                <v-list-item-title class="font-weight-bold">
+                  {{ user.displayName }}
+                </v-list-item-title>
+                <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-divider class="my-2" />
+              <v-list-item
+                rounded="lg"
+                prepend-icon="mdi-logout"
+                title="Logout"
+                class="logout-item"
+                @click="logout" />
+            </v-list>
+          </v-menu>
+
+          <v-btn
+            v-else
+            color="primary"
+            variant="flat"
+            rounded="pill"
+            class="text-none font-weight-medium"
+            @click="handleLogin">
+            Login
+          </v-btn>
+        </template>
+
+        <v-btn
+          icon
+          variant="text"
+          size="small"
+          aria-label="Toggle theme"
+          @click="toggleTheme">
+          <v-icon>{{ isDark ? "mdi-white-balance-sunny" : "mdi-weather-night" }}</v-icon>
+        </v-btn>
       </div>
     </div>
   </v-app-bar>
-  <v-divider v-if="!$vuetify.display.smAndDown"></v-divider>
+
+  <!-- Bar kedua: kategori (desktop) / search (mobile) -->
   <v-app-bar
     app
-    elevation="5"
-    :style="$vuetify.display.smAndDown ? 'margin-top: -1px;' : ''"
+    flat
     scroll-behavior="hide"
-    :height="$vuetify.display.smAndDown ? 65 : 45">
-    <div style="width: 100%" v-if="!$vuetify.display.smAndDown">
-      <v-divider style="margin-top: -14px"></v-divider>
-      <div
-        :class="$vuetify.display.smAndDown ? 'ml-4' : ''"
-        class="d-flex align-center justify-space-between mx-auto mt-2 pl-4 pr-4"
-        style="max-width: 1140px; width: 100%">
-        <div
-          class="d-flex align-center"
-          :style="$vuetify.display.smAndDown ? 'gap: 10px' : 'gap: 20px'">
-          <div
-            v-for="(item, i) in headerAdditional"
-            @click="handleList(item.value)"
-            :key="i"
-            style="font-size: 15px; font-weight: 500"
-            class="cursor-pointer">
-            {{ item.name }}
-          </div>
-        </div>
+    class="nav-sub"
+    :height="$vuetify.display.smAndDown ? 60 : 44">
+    <div class="nav-container">
+      <div v-if="!$vuetify.display.smAndDown" class="d-flex align-center ga-2">
+        <v-chip
+          v-for="item in headerAdditional"
+          :key="item.value"
+          :to="undefined"
+          variant="text"
+          size="small"
+          class="category-chip"
+          @click="handleList(item.value)">
+          {{ item.name }}
+        </v-chip>
       </div>
-    </div>
-    <div v-else style="width: 100%; margin-bottom: -10px" class="pl-4 pr-4">
+
       <v-autocomplete
+        v-else
         v-model="selectedRecipe"
         :items="results"
         :loading="loading"
@@ -212,9 +154,12 @@
         return-object
         no-filter
         hide-no-data
-        :hide-details="false"
+        hide-details
         density="compact"
-        variant="outlined"
+        variant="solo-filled"
+        flat
+        rounded="pill"
+        prepend-inner-icon="mdi-magnify"
         menu-icon=""
         placeholder="Search recipe or ingredient"
         @keydown.enter="searchRecipes"
@@ -222,21 +167,26 @@
         @update:model-value="onSelect" />
     </div>
   </v-app-bar>
-  <v-navigation-drawer style="margin-top: -1px" v-model="drawer" temporary>
-    <v-list>
-      <v-list-item @click="$router.push('/')" link>Home</v-list-item>
-      <v-list-item @click="$router.push('/blog')" link>Blog</v-list-item>
+
+  <v-navigation-drawer v-model="drawer" temporary>
+    <v-list nav density="comfortable">
+      <v-list-item
+        v-for="link in mainLinks"
+        :key="link.to"
+        :prepend-icon="link.icon"
+        :title="link.name"
+        rounded="lg"
+        @click="$router.push(link.to)" />
       <v-list-group value="Recipes">
-        <template v-slot:activator="{ props }">
-          <v-list-item v-bind="props" title="Recipes"> </v-list-item>
+        <template #activator="{ props }">
+          <v-list-item v-bind="props" prepend-icon="mdi-silverware-fork-knife" title="Recipes" rounded="lg" />
         </template>
         <v-list-item
-          v-for="(item, i) in headerAdditional"
-          :key="i"
-          link
-          @click="handleList(item.value)"
-          :title="item.name">
-        </v-list-item>
+          v-for="item in headerAdditional"
+          :key="item.value"
+          :title="item.name"
+          rounded="lg"
+          @click="handleList(item.value)" />
       </v-list-group>
     </v-list>
   </v-navigation-drawer>
@@ -260,25 +210,16 @@
         drawer: false,
         authStore: useAuthStore(),
         search: "",
-        headerAdditional: [
-          {
-            value: "dinner",
-            name: "Dinner",
-          },
-          {
-            value: "easy",
-            name: "Quick & Easy",
-          },
-          {
-            value: "healthy",
-            name: "Healthy",
-          },
-          {
-            value: "tasty",
-            name: "Tasty",
-          },
+        mainLinks: [
+          { name: "Home", to: "/", icon: "mdi-home-outline" },
+          { name: "Blog", to: "/blog", icon: "mdi-book-open-outline" },
         ],
-        items: ["Home", "Blog"],
+        headerAdditional: [
+          { value: "dinner", name: "Dinner" },
+          { value: "easy", name: "Quick & Easy" },
+          { value: "healthy", name: "Healthy" },
+          { value: "tasty", name: "Tasty" },
+        ],
       };
     },
 
@@ -288,6 +229,9 @@
       },
       user() {
         return this.authStore.user;
+      },
+      firstName() {
+        return (this.user?.displayName || "").split(" ")[0];
       },
     },
 
@@ -305,6 +249,12 @@
     },
 
     methods: {
+      isActive(path) {
+        return path === "/"
+          ? this.$route.path === "/"
+          : this.$route.path.startsWith(path);
+      },
+
       toHome() {
         this.$router.push("/");
       },
@@ -405,27 +355,91 @@
 </script>
 
 <style scoped>
-  .button-profile {
-    padding: 10px;
-    cursor: pointer;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-bottom: 2px;
-    border-radius: 4px;
-  }
-  .toggle-mode {
-    padding: 10px;
+  .nav-container {
     display: flex;
     align-items: center;
-    margin-left: 10px;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* Semi-transparan + blur, tanpa shadow tebal */
+  .nav-main,
+  .nav-sub {
+    background-color: rgba(var(--v-theme-surface), 0.85) !important;
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    box-shadow: none !important;
+  }
+  .nav-main {
+    border-bottom: 1px solid rgba(var(--v-border-color), 0.08);
+  }
+  /* Satu-satunya shadow: tipis di bawah bar kedua */
+  .nav-sub {
+    border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .logo {
     cursor: pointer;
-    justify-content: center;
-    border-radius: 4px;
+    flex: 0 0 auto;
   }
-  .text-decoration-none {
-    text-decoration: none;
+
+  .nav-link {
+    position: relative;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    color: rgba(var(--v-theme-on-surface), 0.72);
+    transition: background-color 0.15s, color 0.15s;
   }
-  .text-black {
-    color: black;
+  .nav-link:hover {
+    background-color: rgba(var(--v-theme-on-surface), 0.06);
+    color: rgb(var(--v-theme-on-surface));
+  }
+  .nav-link.active {
+    color: #FF4141;
+    background-color: rgba(255, 120, 0, 0.1);
+  }
+
+  .search-field {
+    width: 340px;
+  }
+  .search-field :deep(.v-field),
+  .nav-sub :deep(.v-field) {
+    --v-field-padding-start: 14px;
+    background-color: rgba(var(--v-theme-on-surface), 0.05);
+    transition: background-color 0.15s, box-shadow 0.15s;
+  }
+  .search-field :deep(.v-field--focused),
+  .nav-sub :deep(.v-field--focused) {
+    background-color: rgb(var(--v-theme-surface));
+    box-shadow: 0 0 0 2px rgba(255, 120, 0, 0.45);
+  }
+
+  .profile-btn {
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .menu-list {
+    border: 1px solid rgba(var(--v-border-color), 0.12);
+  }
+  .logout-item {
+    color: #FF4141;
+  }
+
+  .category-chip {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(var(--v-theme-on-surface), 0.72);
+  }
+  .category-chip:hover {
+    color: #FF4141;
+    background-color: rgba(255, 120, 0, 0.08);
   }
 </style>

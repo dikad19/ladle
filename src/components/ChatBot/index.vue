@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-btn class="chat-fab" color="#ff7800" icon @click="dialog = true">
+    <v-btn class="chat-fab" color="#FF4141" icon @click="dialog = true">
       <v-icon>mdi-robot</v-icon>
     </v-btn>
     <v-dialog

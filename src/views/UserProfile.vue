@@ -54,7 +54,7 @@
         <v-tabs
           v-model="tab"
           bg-color="transparent"
-          color="#ff7800"
+          color="#FF4141"
           grow
         >
           <v-tab
@@ -212,7 +212,7 @@
 
       <template v-slot:actions>
         <v-btn
-          color="#ff7800"
+          color="#FF4141"
           variant="text"
           @click="snackbar = false"
           style="text-transform: capitalize"
