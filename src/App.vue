@@ -74,6 +74,7 @@
     border-top: 1px solid rgba(var(--v-border-color), 0.12);
     background-color: rgb(var(--v-theme-surface)) !important;
   }
+  
   .footer-inner {
     display: flex;
     align-items: center;
@@ -85,10 +86,12 @@
     margin: 0 auto;
     padding: 20px 16px;
   }
+  
   .footer-text {
     font-size: 0.85rem;
     color: rgba(var(--v-theme-on-surface), 0.6);
   }
+  
   .footer-link {
     padding: 4px 10px;
     font-size: 0.9rem;
@@ -98,10 +101,12 @@
     color: rgba(var(--v-theme-on-surface), 0.72);
     transition: background-color 0.15s, color 0.15s;
   }
+  
   .footer-link:hover {
     color: #ff7800;
     background-color: rgba(255, 120, 0, 0.1);
   }
+  
   .footer-link.inline {
     padding: 0;
     font-size: inherit;
@@ -109,6 +114,7 @@
     color: #ff7800;
     background: none;
   }
+  
   .footer-link.inline:hover {
     text-decoration: underline;
     background: none;
