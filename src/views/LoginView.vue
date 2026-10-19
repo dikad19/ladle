@@ -5,7 +5,7 @@
         <div class="mb-8 mt-4 d-flex align-center justify-center flex-column">
           <p class="title-form">Hello</p>
           <p class="mt-2 desc-form">
-            Please log in to access <span style="color: #ff8417">Feast</span>.
+            Please log in to access <span style="color: #FF4141">Ladle</span>.
           </p>
         </div>
         <v-form fast-fail @submit.prevent>
@@ -56,7 +56,7 @@
                   style="margin-left: -3px"
                   class="mr-2"
                   size="20"
-                  color="#ff8417"
+                  color="#FF4141"
                 >
                   mdi-checkbox-marked
                 </v-icon>
@@ -67,7 +67,7 @@
               <div>
                 <p
                   style="
-                    color: #ff8417;
+                    color: #FF4141;
                     font-size: 14px;
                     font-weight: 500;
                   ">
@@ -79,7 +79,7 @@
           <v-btn
             :loading="loading" 
             @click="login"
-            color="#FF8417"
+            color="#FF4141"
             :disabled="!isFormValid || loading"
             height="40"
             class="mt-2"
@@ -114,7 +114,7 @@
       <div>
         <p class="mb-8" style="color: #4f4f4fe5; font-size: 16px">
           Don't have an account yet?
-          <b style="color: #ff8417; cursor: pointer" @click="toRegister()">Register</b>
+          <b style="color: #FF4141; cursor: pointer" @click="toRegister()">Register</b>
         </p>
       </div>
     </div>

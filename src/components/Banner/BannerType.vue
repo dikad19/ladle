@@ -85,7 +85,7 @@
 
 <style scoped>
   .section-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
@@ -95,15 +95,15 @@
     grid-template-columns: 5fr 6fr;
     overflow: hidden;
     cursor: pointer;
-    border-radius: 16px;
+    border-radius: 12px;
     background-color: rgb(var(--v-theme-surface));
     border: 1px solid rgba(var(--v-border-color), 0.12);
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .meal-card:hover,
   .meal-card:focus-visible {
-    border-color: rgba(255, 120, 0, 0.5);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border-color: #FF4141;
+    box-shadow: 0 2px 12px #ff414141;
     outline: none;
   }
   /* Selang-seling posisi gambar di desktop */
@@ -161,7 +161,8 @@
     margin-top: 10px;
     max-width: 62ch;
     line-height: 1.55;
-    color: rgba(var(--v-theme-on-surface), 0.7);
+    font-size: 15px;
+    color: rgb(155, 155, 155);
     display: -webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;

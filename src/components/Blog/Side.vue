@@ -27,6 +27,7 @@
             :src="getImage(post)"
             :alt="post.title"
             height="180"
+            class="rounded-md"
             style="border-radius: 4px"
             cover 
             />
@@ -111,6 +112,7 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
     line-height: normal;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 17px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -127,6 +129,7 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: normal;
-    font-size: 15px;
+    color: rgb(155, 155, 155);
+    font-size: 14px;
   }
 </style>

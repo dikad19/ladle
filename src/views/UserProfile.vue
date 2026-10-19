@@ -26,7 +26,7 @@
           <v-row dense>
             <v-col cols="6">
               <v-btn
-                color="#FF8417"
+                color="#FF4141"
                 variant="elevated"
                 block
                 flat
@@ -185,7 +185,7 @@
                   :disabled="loading || !displayName"
                   :loading="loading"
                   type="submit"
-                  color="#FF8417"
+                  color="#FF4141"
                   class="mt-2 text-white"
                   block
                   flat

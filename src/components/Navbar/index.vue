@@ -15,10 +15,10 @@
         </v-btn>
 
         <v-img
-          src="/assets/logo.png"
+          src="/assets/logo-painted.png"
           class="logo"
-          max-height="34"
-          min-width="34"
+          max-height="30"
+          min-width="30"
           max-width="120"
           @click="handleHome" />
 
@@ -102,7 +102,7 @@
 
           <v-btn
             v-else
-            color="primary"
+            color="#FF4141"
             variant="flat"
             rounded="pill"
             class="text-none font-weight-medium"
@@ -226,6 +226,9 @@
     computed: {
       isDark() {
         return this.$vuetify.theme.global.name === "dark";
+      },
+      logoSrc() {
+        return this.isDark ? "/assets/logo.png" : "/assets/logo-black.png";
       },
       user() {
         return this.authStore.user;

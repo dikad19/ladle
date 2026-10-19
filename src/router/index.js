@@ -17,21 +17,21 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home,
-    meta: { title: "Foxi Feast | Find Your Best Meals" },
+    meta: { title: "Ladle | Find Your Best Meals" },
   },
   {
     path: "/recipe/:id",
     name: "RecipeDetails",
     component: RecipeDetails,
     props: true,
-    meta: { title: "Foxi Feast | Recipe Details" },
+    meta: { title: "Ladle | Recipe Details" },
   },
   {
     path: "/recipe-category/:category",
     name: "RecipeCategory",
     component: RecipeCategory,
     props: true,
-    meta: { title: "Foxi Feast | Recipe Category" },
+    meta: { title: "Ladle | Recipe Category" },
   },
   {
     path: "/recipe-list/:id",
@@ -41,38 +41,38 @@ const routes = [
       id: route.params.id,
       page: parseInt(route.query.page) || 1,
     }),
-    meta: { title: "Foxi Feast | Recipe List" },
+    meta: { title: "Ladle | Recipe List" },
   },
   {
     path: "/profile",
     name: "Profile",
     component: PofileUser,
-    meta: { title: "Foxi Feast | Profile", authOnly: true },
+    meta: { title: "Ladle | Profile", authOnly: true },
   },
   {
     path: "/blog",
     name: "blog",
     component: BlogList,
-    meta: { title: "Foxi Feast | Blog" },
+    meta: { title: "Ladle | Blog" },
   },
   {
     path: "/blog/:slug",
     name: "BlogDetail",
     component: BlogDetail,
     props: true,
-    meta: { title: "Foxi Feast | Blog Detail" },
+    meta: { title: "Ladle | Blog Detail" },
   },
   {
     path: "/setprofile",
     name: "SetProfile",
     component: SetUserProfile,
-    meta: { title: "Foxi Feast | Set Profile", onlyAfterRegister: true },
+    meta: { title: "Ladle | Set Profile", onlyAfterRegister: true },
   },
   {
     path: "/login",
     name: "Login",
     component: LoginPage,
-    meta: { title: "Foxi Feast | Login" },
+    meta: { title: "Ladle | Login" },
     beforeEnter: (to, from, next) => {
       const authStore = useAuthStore();
       if (authStore.user) {
@@ -86,7 +86,7 @@ const routes = [
     path: "/register",
     name: "Register",
     component: RegisterPage,
-    meta: { title: "Foxi Feast | Register" },
+    meta: { title: "Ladle | Register" },
     beforeEnter: (to, from, next) => {
       const authStore = useAuthStore();
       if (authStore.user) {

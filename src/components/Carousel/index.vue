@@ -1,20 +1,26 @@
 <template>
-  <v-row :dense="$vuetify.display.smAndDown">
+  <v-row :dense="$vuetify.display.smAndDown" class="mt-2">
     <!-- Hero carousel -->
     <v-col :cols="$vuetify.display.smAndDown ? 12 : 8">
-      <Carousel
+      <div
         class="hero"
-        :autoplay="4000"
-        :wrap-around="true"
-        :pause-autoplay-on-hover="true">
-        <Slide v-for="slide in carouselData" :key="slide.type">
-          <div class="card hero-card" @click="handleList(slide.type)">
-            <v-img :src="slide.img" cover class="card-img">
-              <template #placeholder>
-                <div class="skeleton" />
-              </template>
-            </v-img>
-
+        @mouseenter="paused = true"
+        @mouseleave="paused = false">
+        <v-carousel
+          :cycle="!paused"
+          :interval="4000"
+          height="100%"
+          show-arrows="hover"
+          hide-delimiter-background
+          delimiter-icon="mdi-circle"
+          class="hero-carousel">
+          <v-carousel-item
+            v-for="slide in carouselData"
+            :key="slide.type"
+            :src="slide.img"
+            cover
+            class="cursor-pointer"
+            @click="handleList(slide.type)">
             <div class="hero-overlay">
               <v-chip
                 size="small"
@@ -28,14 +34,26 @@
                 {{ slide.description }}
               </p>
             </div>
-          </div>
-        </Slide>
+          </v-carousel-item>
 
-        <template #addons>
-          <Navigation />
-          <Pagination />
-        </template>
-      </Carousel>
+          <template #prev="{ props }">
+            <v-btn
+              v-bind="props"
+              icon="mdi-chevron-left"
+              variant="flat"
+              size="small"
+              class="arrow-btn" />
+          </template>
+          <template #next="{ props }">
+            <v-btn
+              v-bind="props"
+              icon="mdi-chevron-right"
+              variant="flat"
+              size="small"
+              class="arrow-btn" />
+          </template>
+        </v-carousel>
+      </div>
     </v-col>
 
     <!-- Kartu samping -->
@@ -65,20 +83,12 @@
 </template>
 
 <script>
-  import { Carousel, Slide, Pagination, Navigation } from "vue3-carousel";
-
   export default {
     name: "CarouselComponent",
 
-    components: {
-      Carousel,
-      Slide,
-      Pagination,
-      Navigation,
-    },
-
     data() {
       return {
+        paused: false,
         carouselData: [
           {
             img: "https://img.spoonacular.com/recipes/659021-636x393.jpg",
@@ -125,81 +135,46 @@
   };
 </script>
 
-<style>
-  /* Style library vue3-carousel (harus non-scoped) */
-  .hero .carousel__viewport {
+<style scoped>
+  /* Wrapper menentukan tinggi lewat aspect-ratio, v-carousel mengisi 100% */
+  .hero {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
     border-radius: 16px;
+    isolation: isolate;
+  }
+  .hero-carousel {
+    height: 100%;
   }
 
-  .hero .carousel__pagination {
-    position: absolute;
-    right: 16px;
-    bottom: 14px;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    gap: 6px;
+  /* Bullet: tanpa background, di kanan bawah */
+  .hero :deep(.v-carousel__controls) {
+    justify-content: flex-end;
+    padding-right: 16px;
+    padding-bottom: 6px;
+    background: transparent;
   }
-  .hero .carousel__pagination-button {
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .hero :deep(.v-carousel__controls .v-btn) {
+    color: #fff;
+    opacity: 0.5;
+    --v-btn-size: 0.45rem;
   }
-  .hero .carousel__pagination-button::after {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.45);
-    transition: width 0.25s, background-color 0.25s;
-  }
-  .hero .carousel__pagination-button--active::after {
-    width: 22px;
-    background-color: #fff;
-  }
-
-  /* Panah: kaca buram, muncul saat hover (desktop) */
-  .hero .carousel__prev,
-  .hero .carousel__next {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    opacity: 0;
-    transition: opacity 0.2s, background 0.2s;
-  }
-  .hero .carousel__prev {
-    left: 12px;
-  }
-  .hero .carousel__next {
-    right: 12px;
-  }
-  .hero:hover .carousel__prev,
-  .hero:hover .carousel__next {
+  .hero :deep(.v-carousel__controls .v-btn--active) {
     opacity: 1;
   }
-  .hero .carousel__prev:hover,
-  .hero .carousel__next:hover {
-    background: rgba(0, 0, 0, 0.55);
+
+  /* Panah kaca buram */
+  .arrow-btn {
+    color: #fff !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
-  .hero .carousel__icon {
-    fill: #fff !important;
+  .arrow-btn:hover {
+    background: rgba(0, 0, 0, 0.55) !important;
   }
 
-  @media (hover: none) {
-    .hero .carousel__prev,
-    .hero .carousel__next {
-      display: none;
-    }
-  }
-</style>
-
-<style scoped>
   .card {
     position: relative;
     width: 100%;
@@ -209,10 +184,6 @@
     text-align: left;
     isolation: isolate;
     background-color: rgba(var(--v-theme-on-surface), 0.08);
-  }
-
-  .hero-card {
-    aspect-ratio: 16 / 9;
   }
   .side-card {
     aspect-ratio: 16 / 8.77;
@@ -258,6 +229,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    text-align: left;
     background: linear-gradient(
       to top,
       rgba(0, 0, 0, 0.78) 0%,
@@ -320,12 +292,14 @@
     transform: translate(2px, -2px);
   }
 
-  /* Dua kartu samping tinggi-nya mengikuti hero di desktop */
   .side-row {
     height: 100%;
   }
 
   @media (max-width: 959px) {
+    .hero {
+      border-radius: 12px;
+    }
     .hero-overlay {
       padding: 40px 16px 16px;
       padding-right: 90px;
@@ -339,8 +313,7 @@
     .side-overlay {
       padding: 28px 12px 10px;
     }
-    .card,
-    .hero .carousel__viewport {
+    .card {
       border-radius: 12px;
     }
   }

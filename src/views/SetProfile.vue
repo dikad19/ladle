@@ -5,7 +5,7 @@
         <div class="mb-8 mt-4 d-flex align-center justify-center flex-column">
           <p class="title-form">Register</p>
           <p class="mt-2 desc-form">
-            Set up your <span style="color: #ff8417">Feast</span> profile.
+            Set up your <span style="color: #FF4141">Ladle</span> profile.
           </p>
         </div>
         <v-form @submit.prevent="handleSetProfile">
@@ -67,7 +67,7 @@
               <v-btn
                 :disabled="loading || !isFormValid"
                 :loading="loading"
-                color="#FF8417"
+                color="#FF4141"
                 type="submit"
                 height="40"
                 class="mt-2"

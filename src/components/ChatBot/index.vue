@@ -17,7 +17,7 @@
         max-width="600">
         <div class="d-flex align-center justify-space-between pb-2 pt-2">
           <v-card-title style="font-size: 18px" class="font-bold">
-            Feast Bot
+            Ladle Bot
           </v-card-title>
           <v-icon class="pr-4" @click="dialog = false">mdi-close</v-icon>
         </div>

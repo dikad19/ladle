@@ -78,24 +78,27 @@
 
           <div class="d-flex align-center ga-2 mt-4">
             <v-btn
-              color="primary"
+              color="#FF4141"
               variant="flat"
               rounded="lg"
-              class="text-none font-weight-medium flex-grow-1"
+              height="35"
+              class="text-none font-weight-medium tracking-normal flex-grow-1"
               :loading="downloading"
               prepend-icon="mdi-download-outline"
               @click="downloadRecipeCard(recipe.id)">
               Download Recipe
             </v-btn>
             <v-btn
-              icon
               variant="outlined"
-              color="primary"
+              color="#FF4141"
               rounded="lg"
               :loading="bookmarkLogin"
+              height="35"
               :aria-label="isFav ? 'Remove bookmark' : 'Bookmark recipe'"
               @click="toggleFavorite">
-              <v-icon>{{ isFav ? "mdi-bookmark-check" : "mdi-bookmark-outline" }}</v-icon>
+              <v-icon>
+                {{ isFav ? "mdi-bookmark-check" : "mdi-bookmark-outline" }}
+              </v-icon>
             </v-btn>
           </div>
 
@@ -113,7 +116,7 @@
           <!-- Kontrol porsi & satuan -->
           <v-row dense class="mt-1">
             <v-col cols="12" sm="6">
-              <div class="control">
+              <div class="control" style="padding-top: 14px; padding-bottom: 14px">
                 <span class="control-label">Servings</span>
                 <div class="d-flex align-center ga-3">
                   <v-btn
@@ -148,8 +151,8 @@
                   color="primary"
                   variant="outlined"
                   divided>
-                  <v-btn value="metric" class="text-none">Metric</v-btn>
-                  <v-btn value="us" class="text-none">US</v-btn>
+                  <v-btn value="metric" height="35" class="text-none">Metric</v-btn>
+                  <v-btn value="us" height="35" class="text-none">US</v-btn>
                 </v-btn-toggle>
               </div>
             </v-col>

@@ -56,7 +56,7 @@
           <v-btn
             :disabled="loading || !displayName"
             :loading="loading"
-            color="#FF8417"
+            color="#FF4141"
             type="submit"
             height="40"
             class="mt-2"

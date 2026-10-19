@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-6">
+  <div class="mb-6 mt-8">
     <h2 class="section-title mt-6 mb-3">Let Fate Choose Your Meal!</h2>
 
     <v-row :dense="$vuetify.display.smAndDown">
@@ -25,8 +25,8 @@
                   item-value="value"
                   variant="solo"
                   flat
-                  rounded="lg"
-                  density="comfortable"
+                  rounded="md"
+                  density="compact"
                   hide-details
                   clearable />
               </v-col>
@@ -39,8 +39,8 @@
                   item-value="value"
                   variant="solo"
                   flat
-                  rounded="lg"
-                  density="comfortable"
+                  rounded="md"
+                  density="compact"
                   hide-details
                   clearable />
               </v-col>
@@ -53,8 +53,8 @@
                   item-value="value"
                   variant="solo"
                   flat
-                  rounded="lg"
-                  density="comfortable"
+                  rounded="md"
+                  density="compact"
                   hide-details
                   clearable />
               </v-col>
@@ -63,7 +63,7 @@
             <v-btn
               class="spin-btn mt-4"
               color="white"
-              rounded="lg"
+              rounded="md"
               size="large"
               elevation="0"
               block
@@ -236,7 +236,7 @@
 
 <style scoped>
   .section-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
@@ -247,11 +247,11 @@
     height: 100%;
     overflow: hidden;
     padding: 24px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #ff9800, #ffb300);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FF4141, #ff7474);
   }
   .spin-panel.dark {
-    background: linear-gradient(135deg, #e86a00, #f2a100);
+    background: linear-gradient(135deg, #FF4141, #ff7474);
   }
   .spin-deco {
     position: absolute;
@@ -268,15 +268,16 @@
   }
   .spin-intro {
     max-width: 560px;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: normal;
     color: #fff;
+    margin-bottom: 15px;
   }
   .spin-btn {
     font-weight: 600;
     letter-spacing: normal;
     text-transform: none;
-    color: #e86a00 !important;
+    color: #ff7474 !important;
   }
 
   /* Kartu hasil */
@@ -286,7 +287,7 @@
     height: 100%;
     min-height: 210px;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 12px;
     background-color: rgb(var(--v-theme-surface));
     border: 1px solid rgba(var(--v-border-color), 0.12);
     text-decoration: none;
